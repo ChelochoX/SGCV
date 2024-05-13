@@ -1,4 +1,5 @@
 ﻿using Persistence;
+using sgcv_backend.Core.Application.Services;
 using sgcv_backend.Core.Application.Services.Interfaces;
 using sgcv_backend.Persistence.Repositories;
 using System.Reflection;
@@ -18,6 +19,7 @@ public static class ServiceExtensions
         //Bloque de persistencia
         services.AddTransient<DbConnections>();
         services.AddTransient<IClienteRepository, ClienteRepository>();
+        services.AddTransient<IClienteService, ClienteService>();
 
         services.AddCors(options =>
         {

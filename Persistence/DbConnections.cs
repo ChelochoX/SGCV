@@ -14,7 +14,7 @@ namespace Persistence
 
         }
         //Conexion a mi base local
-        public IDbConnection CreateSqlConnectionLocalDB() => new SqlConnection(sqlConnectionStringLocalDB);
+        public IDbConnection CreateSqlConnection() => new SqlConnection(sqlConnectionStringLocalDB);
 
     }
 }

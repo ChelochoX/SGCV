@@ -4,10 +4,10 @@ using sgcv_backend.Core.Domain.Response;
 
 namespace sgcv_backend.Core.Application.Services.Interfaces;
 
-public interface IClienteRepository
+public interface IClienteService
 {
-    #region Clientes
 
+    #region Clientes
     Task<Datos<int>> InsertarSolicitudBienesCircunscripcion(ClienteDatosPersonalesInsertarRequest request);
     Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdeCliente(ClienteDatosPersonalesObtenerRequest request);
     Task<int> ActualizarDatosParticularesdelCliente(ClienteDatosPersonalesActualizarRequest request);
