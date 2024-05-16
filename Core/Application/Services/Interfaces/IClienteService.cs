@@ -8,7 +8,7 @@ public interface IClienteService
 {
 
     #region Clientes
-    Task<Datos<int>> InsertarSolicitudBienesCircunscripcion(ClienteDatosPersonalesInsertarRequest request);
+    Task<Datos<int>> InsertarDatosPersonalesCliente(ClienteDatosPersonalesInsertarRequest request);
     Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdeCliente(ClienteDatosPersonalesObtenerRequest request);
     Task<int> ActualizarDatosParticularesdelCliente(ClienteDatosPersonalesActualizarRequest request);
 

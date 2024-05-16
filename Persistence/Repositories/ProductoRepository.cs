@@ -8,39 +8,37 @@ using sgcv_backend.Core.Domain.Response;
 
 namespace sgcv_backend.Persistence.Repositories
 {
-    public class ClienteRepository : IClienteRepository
+    public class ProductoRepository : IClienteRepository
     {
         private readonly DbConnections _conexion;
-        private readonly ILogger<ClienteRepository> _logger;
+        private readonly ILogger<ProductoRepository> _logger;
 
-        public ClienteRepository(DbConnections conexion, ILogger<ClienteRepository> logger)
+        public ProductoRepository(DbConnections conexion, ILogger<ProductoRepository> logger)
         {
             _conexion = conexion;
             _logger = logger;
-        }
+        }       
 
-        #region CLIENTES
-
-        public async Task<Datos<int>> InsertarDatosPersonalesCliente(ClienteDatosPersonalesInsertarRequest request)
+        public async Task<Datos<int>> InsertarDatosProducto(ProductoDatosRequest request)
         {
-            _logger.LogInformation("Inicio de Proceso de insertar datos en la tabla de Clientes");
+            _logger.LogInformation("Inicio de Proceso de insertar datos en la tabla de Productos");
 
-            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_cliente),0) FROM [cliente_datospersonales]";
+            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_nombre),0) FROM producto_nombre";
 
-            string query_CheckCedulaExists = "SELECT COUNT(*) FROM cliente_datospersonales WHERE cedula = @cedula";
+            string query_CheckExistenciaProducto = "SELECT COUNT(*) FROM producto_nombre WHERE nombre = @nombre";
 
 
             string query = @"
-                            INSERT INTO cliente_datospersonales
-                           (codigo_cliente,cedula,ruc,nombres,apellidos,telefono_movil,telefono_lineabaja,direccion_particular,numero_casa)
+                            INSERT INTO producto_nombre
+                               (codigo_producto,numeracion,nombre,descripcion,codigo_categoria,codigo_unidadmedida,codigo_precio)
                             VALUES
-                            (@codigoCliente,@cedula,@ruc,@nombres,@apellidos,@movil,@lineabaja,@direccion,@numerocasa)";
+                            ()";
             try
             {
                 using (var connection = this._conexion.CreateSqlConnection())
                 {
 
-                    int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckCedulaExists, new { cedula = request.Cedula });
+                    int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckExistenciaProducto, new { cedula = request.Nombre });
                     if (existingCedulaCount > 0)
                     {                    
                         return new Datos<int>
@@ -55,15 +53,13 @@ namespace sgcv_backend.Persistence.Repositories
                     //Generamos los valores para registrar la tabla Clientes
                     int ultimoValorCodigo = await connection.ExecuteScalarAsync<int>(query_UltimoNroCodigo);
                     int nuevoCodigoSolicitud = ultimoValorCodigo + 1;
-                    parametros.Add("@codigoCliente", nuevoCodigoSolicitud);
-                    parametros.Add("@cedula", request.Cedula);
-                    parametros.Add("@ruc", request.Ruc);
-                    parametros.Add("@nombres", request.Nombres);
-                    parametros.Add("@apellidos", request.Apellidos);
-                    parametros.Add("@movil", request.TelefonoMovil);
-                    parametros.Add("@lineabaja", request.TelefonoLineaBaja);
-                    parametros.Add("@direccion", request.DireccionParticular);
-                    parametros.Add("@numerocasa", request.NumeroCasa);                               
+                    parametros.Add("@codigoProducto", nuevoCodigoSolicitud);
+                    parametros.Add("@umeracion", request.Numeracion);
+                    parametros.Add("@nombre", request.Nombre);
+                    parametros.Add("@descripcion", request.Descripcion);
+                    parametros.Add("@codigoCategoria", request.CodigoCategoria);
+                    parametros.Add("@codigoUnidadMedida", request.CodigoUnidadMedida);
+                    parametros.Add("@codigoPrecio", request.CodigoPrecio);                             
 
                     var resultado = await connection.ExecuteAsync(query, parametros);
 
@@ -73,20 +69,20 @@ namespace sgcv_backend.Persistence.Repositories
                         TotalRegistros = 1
                     };
 
-                    _logger.LogInformation("Fin de Proceso de insertar datos en la tabla de Clientes");
+                    _logger.LogInformation("Fin de Proceso de insertar datos en la tabla de Productos");
 
                     return respuesta;
                 }
             }
             catch (Exception ex)
             {
-                throw new ClientesException("Ocurrio un error al insertar los datos en la tabla Clientes Datos Personales" + "||-->" + ex.Message + "<--||");
+                throw new ClientesException("Ocurrio un error al insertar los datos en la tabla Datos Nombre del Producto" + "||-->" + ex.Message + "<--||");
             }
         }
 
-        public async Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdeCliente(ClienteDatosPersonalesObtenerRequest request)
+        public async Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdelProducto(ClienteDatosPersonalesObtenerRequest request)
         {
-            _logger.LogInformation("Inicio de Proceso de Obtener Datos personales del Cliente");
+            _logger.LogInformation("Inicio de Proceso de Obtener Datos del Producto");
 
             int saltarRegistros = (request.Pagina - 1) * request.CantidadRegistros;
             var query = string.Empty;
@@ -226,7 +222,7 @@ namespace sgcv_backend.Persistence.Repositories
                         TotalRegistros = totalTegistros
                     };
 
-                    _logger.LogInformation("Fin de Proceso de Obtener Datos personales del Cliente");
+                    _logger.LogInformation("Inicio de Proceso de Obtener Datos del Producto");
                     return response;
                 }
             }
@@ -288,7 +284,7 @@ namespace sgcv_backend.Persistence.Repositories
             }
         }
 
-        #endregion
+      
 
 
     }

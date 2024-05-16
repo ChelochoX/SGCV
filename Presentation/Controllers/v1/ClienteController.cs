@@ -24,7 +24,7 @@ public class ClienteController : ControllerBase
     }
 
 
-    #region Cliente
+   
 
     [HttpPost("InsertarDatosPersonalesCliente")]
     [SwaggerOperation(
@@ -41,7 +41,7 @@ public class ClienteController : ControllerBase
             throw new ValidationException(validationResult.Errors);
         }
 
-        var datosInsertados = await _service.InsertarSolicitudBienesCircunscripcion(request);
+        var datosInsertados = await _service.InsertarDatosPersonalesCliente(request);
 
         if (datosInsertados != null && datosInsertados.Items != -1)
         {
@@ -193,6 +193,6 @@ public class ClienteController : ControllerBase
            
     }      
 
-    #endregion
+   
 
 }

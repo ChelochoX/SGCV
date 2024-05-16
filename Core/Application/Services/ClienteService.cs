@@ -16,13 +16,10 @@ public class ClienteService : IClienteService
         _repository = repository;
         _mapper = mapper;
     }
-
-
-
-    #region Cliente 
-    public async Task<Datos<int>> InsertarSolicitudBienesCircunscripcion(ClienteDatosPersonalesInsertarRequest request)
+     
+    public async Task<Datos<int>> InsertarDatosPersonalesCliente(ClienteDatosPersonalesInsertarRequest request)
     {
-        return await _repository.InsertarSolicitudBienesCircunscripcion(request);
+        return await _repository.InsertarDatosPersonalesCliente(request);
     }
 
     public async Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdeCliente(ClienteDatosPersonalesObtenerRequest request)
@@ -35,5 +32,5 @@ public class ClienteService : IClienteService
         return await _repository.ActualizarDatosParticularesdelCliente(request);
     }
 
-    #endregion
+
 }
