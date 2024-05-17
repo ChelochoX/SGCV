@@ -8,7 +8,7 @@ using sgcv_backend.Core.Domain.Response;
 
 namespace sgcv_backend.Persistence.Repositories
 {
-    public class ProductoRepository : IClienteRepository
+    public class ProductoRepository : IProductoRepository
     {
         private readonly DbConnections _conexion;
         private readonly ILogger<ProductoRepository> _logger;
@@ -233,58 +233,7 @@ namespace sgcv_backend.Persistence.Repositories
             }
         }
 
-        public async Task<int> ActualizarDatosParticularesdelCliente(ClienteDatosPersonalesActualizarRequest request)
-        {
-            _logger.LogInformation("Inicio del Proceso de actualizar datos particulares del cliente");
-
-            string query = @"UPDATE cliente_datospersonales
-                               SET cedula = @cedula
-                                  ,ruc = @ruc
-                                  ,nombres = @nombres
-                                  ,apellidos = @apellidos
-                                  ,telefono_movil = @movil
-                                  ,telefono_lineabaja = @lineabaja
-                                  ,direccion_particular = @direccion
-                                  ,numero_casa = @numerocasa
-                             WHERE codigo_cliente = @codigoCliente";
-
-            string query_CheckCedulaExists = "SELECT COUNT(*) FROM cliente_datospersonales WHERE cedula = @cedula";
-
-            var parametros = new DynamicParameters();
-
-            parametros.Add("@codigoCliente", request.ParametroCodigoCliente);
-            parametros.Add("@cedula", request.Cedula);
-            parametros.Add("@ruc", request.Ruc);
-            parametros.Add("@nombres", request.Nombres);
-            parametros.Add("@apellidos", request.Apellidos);
-            parametros.Add("@movil", request.TelefonoMovil);
-            parametros.Add("@lineabaja", request.TelefonoLineaBaja);
-            parametros.Add("@direccion", request.DireccionParticular);
-            parametros.Add("@numerocasa", request.NumeroCasa);
-
-            try
-            {
-                using (var connection = this._conexion.CreateSqlConnection())
-                {
-                    int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckCedulaExists, new { cedula = request.Cedula });
-                    if (existingCedulaCount > 0)
-                    {
-                        return -1;                       
-                    }
-
-                    var resultado = await connection.ExecuteAsync(query, parametros);
-
-                    _logger.LogInformation("Fin del Proceso de actualizar datos particulares del cliente");
-                    return resultado;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ClientesException("Ocurrió un error al modificar los datos particulares del cliente" + "||-->" + ex.Message + "<--||");
-            }
-        }
-
-      
+            
 
 
     }
