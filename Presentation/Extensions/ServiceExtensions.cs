@@ -1,6 +1,7 @@
 ﻿using Persistence;
 using sgcv_backend.Core.Application.Services;
 using sgcv_backend.Core.Application.Services.Interfaces;
+using sgcv_backend.Core.Application.Services.Interfaces.IRepository;
 using sgcv_backend.Persistence.Repositories;
 using System.Reflection;
 

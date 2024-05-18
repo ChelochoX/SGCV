@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Persistence;
-using sgcv_backend.Core.Application.Services.Interfaces;
+using sgcv_backend.Core.Application.Services.Interfaces.IRepository;
 using sgcv_backend.Core.Domain.Entities;
 using sgcv_backend.Core.Domain.Exceptions;
 using sgcv_backend.Core.Domain.Request;

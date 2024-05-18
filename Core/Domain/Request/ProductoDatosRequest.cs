@@ -6,7 +6,7 @@ namespace sgcv_backend.Core.Domain.Request
     public class ProductoDatosRequest
     {
         public int CodigoProducto { get; set; }
-        public string Numeracion { get; set; }
+        public string Codigo { get; set; }
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
         public int CodigoCategoria { get; set; }

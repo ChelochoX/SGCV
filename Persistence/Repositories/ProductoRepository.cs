@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Persistence;
-using sgcv_backend.Core.Application.Services.Interfaces;
+using sgcv_backend.Core.Application.Services.Interfaces.IRepository;
 using sgcv_backend.Core.Domain.Entities;
 using sgcv_backend.Core.Domain.Exceptions;
 using sgcv_backend.Core.Domain.Request;
@@ -17,7 +17,7 @@ namespace sgcv_backend.Persistence.Repositories
         {
             _conexion = conexion;
             _logger = logger;
-        }       
+        }
 
         public async Task<Datos<int>> InsertarDatosProducto(ProductoDatosRequest request)
         {
@@ -32,7 +32,7 @@ namespace sgcv_backend.Persistence.Repositories
                             INSERT INTO producto_nombre
                                (codigo_producto,numeracion,nombre,descripcion,codigo_categoria,codigo_unidadmedida,codigo_precio)
                             VALUES
-                            ()";
+                            (@codigoProducto,@codigo,@nombre,@descripcion,@codigoCategoria,@codigoUnidadMedida,@codigoPrecio)";
             try
             {
                 using (var connection = this._conexion.CreateSqlConnection())
@@ -40,10 +40,10 @@ namespace sgcv_backend.Persistence.Repositories
 
                     int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckExistenciaProducto, new { cedula = request.Nombre });
                     if (existingCedulaCount > 0)
-                    {                    
+                    {
                         return new Datos<int>
                         {
-                            Items = -1, 
+                            Items = -1,
                             TotalRegistros = 0
                         };
                     }
@@ -54,12 +54,12 @@ namespace sgcv_backend.Persistence.Repositories
                     int ultimoValorCodigo = await connection.ExecuteScalarAsync<int>(query_UltimoNroCodigo);
                     int nuevoCodigoSolicitud = ultimoValorCodigo + 1;
                     parametros.Add("@codigoProducto", nuevoCodigoSolicitud);
-                    parametros.Add("@umeracion", request.Numeracion);
+                    parametros.Add("@codigo", request.Codigo);
                     parametros.Add("@nombre", request.Nombre);
                     parametros.Add("@descripcion", request.Descripcion);
                     parametros.Add("@codigoCategoria", request.CodigoCategoria);
                     parametros.Add("@codigoUnidadMedida", request.CodigoUnidadMedida);
-                    parametros.Add("@codigoPrecio", request.CodigoPrecio);                             
+                    parametros.Add("@codigoPrecio", request.CodigoPrecio);
 
                     var resultado = await connection.ExecuteAsync(query, parametros);
 
@@ -142,7 +142,7 @@ namespace sgcv_backend.Persistence.Repositories
                                      AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
                     }
                 }
-            
+
                 query += @" ORDER BY s.cedula";
                 query += @" OFFSET @saltarRegistros ROWS";
                 query += @" FETCH NEXT @cantidadRegistros ROWS ONLY";
@@ -191,11 +191,11 @@ namespace sgcv_backend.Persistence.Repositories
                                      AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
                                      AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
                     }
-                }           
+                }
 
                 // Definición de parámetros
                 var parametros = new DynamicParameters();
-               
+
                 parametros.Add("@codigoCliente", request.ParametroCodigoCliente);
                 parametros.Add("@cedula", request.Cedula);
                 parametros.Add("@ruc", request.Ruc);
@@ -214,7 +214,7 @@ namespace sgcv_backend.Persistence.Repositories
                 {
                     var totalTegistros = await connection.ExecuteScalarAsync<int>(queryCantidadTotalRegistros, parametros);
 
-                    var resultado = await connection.QueryAsync<ClienteDatosPersonalesResponse>(query, parametros);                
+                    var resultado = await connection.QueryAsync<ClienteDatosPersonalesResponse>(query, parametros);
 
                     var response = new Datos<IEnumerable<ClienteDatosPersonalesResponse>>
                     {
@@ -233,8 +233,110 @@ namespace sgcv_backend.Persistence.Repositories
             }
         }
 
+        public async Task<IEnumerable<CategoriasDatosResponse>> ObtenerDatosCategoria ()
+        {
+            _logger.LogInformation("Inicio de Proceso de Obtener Datos de Categorias");     
             
+            try
+            {
+                var query = @"
+                           SELECT codigo_categoria
+                                ,nombre
+                                ,descripcion
+                            FROM categoria";         
 
+                using (var connection = this._conexion.CreateSqlConnection())
+                {                
+                    var resultado = await connection.QueryAsync<CategoriasDatosResponse>(query);                
+
+                    _logger.LogInformation("Fin de Proceso de Obtener Datos de Categorias");
+                    return resultado.ToList();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw new ClientesException("Ocurrió un error inesperado al realizar la Consulta de Datos de Categorias" + "||-->" + ex.Message + "<--||");
+            }
+        }
+
+        public async Task<IEnumerable<UnidadMedidaResponse>> ObtenerDatosUnidadMedida()
+        {
+            _logger.LogInformation("Inicio de Proceso de Obtener Datos de Unidades de Medida");
+
+            try
+            {
+                var query = @"
+                           SELECT codigo_unidadmedida
+                              ,siglas
+                              ,nombre
+                              ,descripcion
+                          FROM unidad_medida";
+
+                using (var connection = this._conexion.CreateSqlConnection())
+                {
+                    var resultado = await connection.QueryAsync<UnidadMedidaResponse>(query);
+
+                    _logger.LogInformation("Fin de Proceso de Obtener Datos de Unidades de Medida");
+                    return resultado.ToList();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw new ClientesException("Ocurrió un error inesperado al realizar la Consulta de Datos de Unidades de Medida" + "||-->" + ex.Message + "<--||");
+            }
+        }
+
+        public async Task<Datos<int>> InsertarPreciosProducto(PrecioProductoRequest request)
+        {
+            _logger.LogInformation("Inicio de Proceso de insertar datos en la tabla de Precios");
+
+            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_precio),0) FROM producto_precio";         
+
+            string query = @"
+                            INSERT INTO producto_precio
+                               (codigo_precio,lista,compra,venta,iva10,iva5,exenta,estado,observacion,codigo_producto)
+                            VALUES
+                               (@codigoprecio,@lista,@compra,@venta,@iva10,@iva5,@exenta,@estado,@observacion,@codigoProducto)";
+            try
+            {
+                using (var connection = this._conexion.CreateSqlConnection())
+                {                 
+                    var parametros = new DynamicParameters();
+
+                    //Generamos los valores para registrar la tabla Clientes
+                    int ultimoValorCodigo = await connection.ExecuteScalarAsync<int>(query_UltimoNroCodigo);
+                    int nuevoCodigoSolicitud = ultimoValorCodigo + 1;
+                    parametros.Add("@codigoprecio", nuevoCodigoSolicitud);
+                    parametros.Add("@lista", request.Lista);
+                    parametros.Add("@compra", request.Compra);
+                    parametros.Add("@venta", request.Venta);
+                    parametros.Add("@iva10", request.Iva10);
+                    parametros.Add("@iva5", request.Iva5);
+                    parametros.Add("@exenta", request.Exenta);
+                    parametros.Add("@estado", request.Estado);
+                    parametros.Add("@observacion", request.Observacion);
+                    parametros.Add("@codigoProducto", request.CodigoProducto);
+
+                    var resultado = await connection.ExecuteAsync(query, parametros);
+
+                    var respuesta = new Datos<int>
+                    {
+                        Items = nuevoCodigoSolicitud,
+                        TotalRegistros = 1
+                    };
+
+                    _logger.LogInformation("Fin de Proceso de insertar datos en la tabla de Precios");
+
+                    return respuesta;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ClientesException("Ocurrio un error al insertar los datos en la tabla Precio Producto" + "||-->" + ex.Message + "<--||");
+            }
+        }
 
     }
 }
