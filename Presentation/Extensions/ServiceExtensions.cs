@@ -21,6 +21,8 @@ public static class ServiceExtensions
         services.AddTransient<DbConnections>();
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IClienteService, ClienteService>();
+        services.AddTransient<IProductoRepository, ProductoRepository>();
+        services.AddTransient<IProductoService, ProductoService>();
 
         services.AddCors(options =>
         {

@@ -87,7 +87,7 @@ public class ClienteController : ControllerBase
         [FromQuery][Description("Valor que indica la descripcion del objeto de gasto")] int? numeroCasa,
         [FromQuery][Description("Valor que identifica el objeto a buscar en el filtro generico")] string? terminoDeBusqueda,
 
-        [FromQuery][Description("Valor que identifica el periodo de la configuracion presupuestaria")] int parametroCodigoCliente,
+        //[FromQuery][Description("Valor que identifica el periodo de la configuracion presupuestaria")] int parametroCodigoCliente,
         [FromQuery][Description("Valor que indica el inicio desde donde se obtendra el registro")] int pagina,
         [FromQuery][Description("Valor que indica la cantidad de registros a recuperar")] int cantidadRegistros)
     {
@@ -102,17 +102,17 @@ public class ClienteController : ControllerBase
             DireccionParticular = direccionParticular,
             NumeroCasa = numeroCasa,
             TerminoBusqueda = terminoDeBusqueda, 
-            ParametroCodigoCliente = parametroCodigoCliente,    
+            //ParametroCodigoCliente = parametroCodigoCliente,    
             Pagina = pagina,
             CantidadRegistros = cantidadRegistros
         };
 
-        var validationResult = new ClienteDatosPersonalesObtenerRequestValidator().Validate(request);
+        //var validationResult = new ClienteDatosPersonalesObtenerRequestValidator().Validate(request);
 
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
+        //if (!validationResult.IsValid)
+        //{
+        //    throw new ValidationException(validationResult.Errors);
+        //}
 
         var resultado = await _service.ObtenerDatosdeCliente(request);
 

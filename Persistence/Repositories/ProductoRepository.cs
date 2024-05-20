@@ -23,22 +23,22 @@ namespace sgcv_backend.Persistence.Repositories
         {
             _logger.LogInformation("Inicio de Proceso de insertar datos en la tabla de Productos");
 
-            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_nombre),0) FROM producto_nombre";
+            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_producto),0) FROM producto_nombre";
 
-            string query_CheckExistenciaProducto = "SELECT COUNT(*) FROM producto_nombre WHERE nombre = @nombre";
+            string query_CheckExistenciaProducto = "SELECT COUNT(*) FROM producto_nombre WHERE nombre = nombre";
 
 
             string query = @"
                             INSERT INTO producto_nombre
-                               (codigo_producto,numeracion,nombre,descripcion,codigo_categoria,codigo_unidadmedida,codigo_precio)
+                               (codigo_producto,codigo,nombre,descripcion,codigo_categoria,codigo_unidadmedida)
                             VALUES
-                            (@codigoProducto,@codigo,@nombre,@descripcion,@codigoCategoria,@codigoUnidadMedida,@codigoPrecio)";
+                            (@codigoProducto,@codigo,@nombre,@descripcion,@codigoCategoria,@codigoUnidadMedida)";
             try
             {
                 using (var connection = this._conexion.CreateSqlConnection())
                 {
 
-                    int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckExistenciaProducto, new { cedula = request.Nombre });
+                    int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckExistenciaProducto, new { nombre = request.Nombre });
                     if (existingCedulaCount > 0)
                     {
                         return new Datos<int>
@@ -58,8 +58,7 @@ namespace sgcv_backend.Persistence.Repositories
                     parametros.Add("@nombre", request.Nombre);
                     parametros.Add("@descripcion", request.Descripcion);
                     parametros.Add("@codigoCategoria", request.CodigoCategoria);
-                    parametros.Add("@codigoUnidadMedida", request.CodigoUnidadMedida);
-                    parametros.Add("@codigoPrecio", request.CodigoPrecio);
+                    parametros.Add("@codigoUnidadMedida", request.CodigoUnidadMedida);                   
 
                     var resultado = await connection.ExecuteAsync(query, parametros);
 
@@ -80,7 +79,7 @@ namespace sgcv_backend.Persistence.Repositories
             }
         }
 
-        public async Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdelProducto(ClienteDatosPersonalesObtenerRequest request)
+        public async Task<Datos<IEnumerable<ProductoConPrecioResponse>>> ObtenerDatosdelProducto(ProductoObtenerDatosRequest request)
         {
             _logger.LogInformation("Inicio de Proceso de Obtener Datos del Producto");
 
@@ -90,121 +89,98 @@ namespace sgcv_backend.Persistence.Repositories
             try
             {
                 query = @"
-                            SELECT s.cedula as Cedula
-                              ,s.ruc as Ruc
-                              ,s.nombres as Nombres
-                              ,s.apellidos as Apellidos
-                              ,s.telefono_movil as TelefonoMovil 
-                              ,s.telefono_lineabaja as TelefonoLineaBaja
-                              ,s.direccion_particular as DireccionParticular
-                              ,s.numero_casa as NumeroCasa
-                          FROM cliente_datospersonales s
-                          WHERE codigo_cliente = @codigoCliente ";
-
+                           SELECT pr.codigo_producto as IDProducto
+                              ,pr.codigo as CodigoProducto
+                              ,pr.nombre as NombreProducto
+                              ,pr.descripcion as DescripcionProducto
+                              ,pr.codigo_categoria as CodigoCategoria
+	                          ,c.nombre as NombreCategoria
+                              ,pr.codigo_unidadmedida as CodigoUnidadMedida
+	                          ,u.siglas as SiglasUnidadMedida
+	                          ,u.nombre as NombreUnidadMedida
+                              ,pc.lista as ListaPrecio,
+	                          pc.compra as PrecioCompra,
+	                          pc.venta as PrecioVenta,
+	                          pc.iva10 as Iva10,
+	                          pc.iva5 as Iva5,
+	                          pc.exenta as Exenta,
+	                          pc.estado as EstadoPrecio
+                          FROM producto_nombre pr 
+                          JOIN producto_precio pc ON pr.codigo_producto = pc.codigo_producto
+                          JOIN categoria c ON PR.codigo_categoria = c.codigo_categoria
+                          JOIN unidad_medida u ON pr.codigo_unidadmedida = u.codigo_unidadmedida ";
 
                 if (
-                    !string.IsNullOrEmpty(request.Cedula) ||
-                    !string.IsNullOrEmpty(request.Ruc) ||
-                    !string.IsNullOrEmpty(request.Nombres) ||
-                    !string.IsNullOrEmpty(request.Apellidos) ||
-                    !string.IsNullOrEmpty(request.TelefonoMovil) ||
-                    !string.IsNullOrEmpty(request.TelefonoLineaBaja) ||
-                    !string.IsNullOrEmpty(request.DireccionParticular) ||
-                    !string.IsNullOrEmpty(request.NumeroCasa.ToString()) ||
-                    !string.IsNullOrEmpty(request.TerminoBusqueda)
+                    !string.IsNullOrEmpty(request.CodigoProducto) ||
+                    !string.IsNullOrEmpty(request.NombreProducto) ||
+                    !string.IsNullOrEmpty(request.DescripcionProducto) ||
+                    !string.IsNullOrEmpty(request.NombreCategoria)
                     )
                 {
                     // Se proporcionaron parámetros de búsqueda, agregar filtros adicionales
                     if (!string.IsNullOrEmpty(request.TerminoBusqueda))
                     {
                         query += @"
-                                    AND (                                        
-                                        s.cedula LIKE '%' + @terminoDeBusqueda + '%'                       
-                                        OR s.ruc LIKE '%' + @terminoDeBusqueda + '%'                                                            
-                                        OR s.nombres LIKE '%' + @terminoDeBusqueda + '%'                                                               
-                                        OR s.apellidos LIKE '%' + @terminoDeBusqueda + '%'                                                          
-                                        OR s.telefono_movil LIKE '%' + @terminoDeBusqueda + '%'                                                                
-                                        OR s.telefono_lineabaja LIKE '%' + @terminoDeBusqueda + '%' 
-                                        OR s.direccion_particular LIKE '%' + @terminoDeBusqueda + '%'                                                   
-                                        OR (CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @terminoDeBusqueda + '%'
-                                    )";
+                            WHERE pr.codigo LIKE '%' + @terminoDeBusqueda + '%'                       
+                            OR pr.nombre LIKE '%' + @terminoDeBusqueda + '%'                                                            
+                            OR pr.descripcion LIKE '%' + @terminoDeBusqueda + '%'                                                               
+                            OR c.nombre LIKE '%' + @terminoDeBusqueda + '%'";
                     }
                     else
                     {
                         query += @"
-                                     AND (@cedula IS NULL OR s.cedula LIKE '%' + @cedula + '%')
-                                     AND (@ruc IS NULL OR s.ruc LIKE '%' + @ruc + '%')
-                                     AND (@nombres IS NULL OR s.nombres LIKE '%' + @nombres + '%')
-                                     AND (@apellidos IS NULL OR s.apellidos LIKE '%' + @apellidos + '%')
-                                     AND (@movil IS NULL OR s.telefono_movil LIKE '%' + @movil + '%')
-                                     AND (@lineabaja IS NULL OR s.telefono_lineabaja LIKE '%' + @lineabaja + '%')
-                                     AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
-                                     AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
+                            WHERE @codigoProducto IS NULL OR pr.codigo LIKE '%' + @codigoProducto + '%'
+                            AND (@nombreProducto IS NULL OR pr.nombre LIKE '%' + @nombreProducto + '%')
+                            AND (@descripcionProducto IS NULL OR pr.descripcion LIKE '%' + @descripcionProducto + '%')
+                            AND (@nombreCategoria IS NULL OR c.nombre LIKE '%' + @nombreCategoria + '%')";
                     }
                 }
 
-                query += @" ORDER BY s.cedula";
+                query += @" ORDER BY pr.codigo_producto";
                 query += @" OFFSET @saltarRegistros ROWS";
                 query += @" FETCH NEXT @cantidadRegistros ROWS ONLY";
 
 
                 string queryCantidadTotalRegistros = @"
                                 SELECT COUNT(*) AS TotalRegistros 
-                                FROM cliente_datospersonales s
-                                WHERE codigo_cliente = @codigoCliente ";
+                                FROM producto_nombre pr 
+                          JOIN producto_precio pc ON pr.codigo_producto = pc.codigo_producto
+                          JOIN categoria c ON PR.codigo_categoria = c.codigo_categoria
+                          JOIN unidad_medida u ON pr.codigo_unidadmedida = u.codigo_unidadmedida  ";
 
                 if (
-                   !string.IsNullOrEmpty(request.Cedula) ||
-                    !string.IsNullOrEmpty(request.Ruc) ||
-                    !string.IsNullOrEmpty(request.Nombres) ||
-                    !string.IsNullOrEmpty(request.Apellidos) ||
-                    !string.IsNullOrEmpty(request.TelefonoMovil) ||
-                    !string.IsNullOrEmpty(request.TelefonoLineaBaja) ||
-                    !string.IsNullOrEmpty(request.DireccionParticular) ||
-                    !string.IsNullOrEmpty(request.NumeroCasa.ToString()) ||
-                    !string.IsNullOrEmpty(request.TerminoBusqueda)
+                    !string.IsNullOrEmpty(request.CodigoProducto) ||
+                    !string.IsNullOrEmpty(request.NombreProducto) ||
+                    !string.IsNullOrEmpty(request.DescripcionProducto) ||
+                    !string.IsNullOrEmpty(request.NombreCategoria)
                     )
                 {
                     if (!string.IsNullOrEmpty(request.TerminoBusqueda))
                     {
                         queryCantidadTotalRegistros += @"
-                                    AND (                                        
-                                         s.cedula LIKE '%' + @terminoDeBusqueda + '%'                       
-                                        OR s.ruc LIKE '%' + @terminoDeBusqueda + '%'                                                            
-                                        OR s.nombres LIKE '%' + @terminoDeBusqueda + '%'                                                               
-                                        OR s.apellidos LIKE '%' + @terminoDeBusqueda + '%'                                                          
-                                        OR s.telefono_movil LIKE '%' + @terminoDeBusqueda + '%'                                                                
-                                        OR s.telefono_lineabaja LIKE '%' + @terminoDeBusqueda + '%' 
-                                        OR s.direccion_particular LIKE '%' + @terminoDeBusqueda + '%'                                                   
-                                        OR (CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @terminoDeBusqueda + '%'
-                                    )";
+                            WHERE pr.codigo LIKE '%' + @terminoDeBusqueda + '%'                       
+                            OR pr.nombre LIKE '%' + @terminoDeBusqueda + '%'                                                            
+                            OR pr.descripcion LIKE '%' + @terminoDeBusqueda + '%'                                                               
+                            OR c.nombre LIKE '%' + @terminoDeBusqueda + '%'";
                     }
                     else
                     {
                         queryCantidadTotalRegistros += @"
-                                     AND (@cedula IS NULL OR s.cedula LIKE '%' + @cedula + '%')
-                                     AND (@ruc IS NULL OR s.ruc LIKE '%' + @ruc + '%')
-                                     AND (@nombres IS NULL OR s.nombres LIKE '%' + @nombres + '%')
-                                     AND (@apellidos IS NULL OR s.apellidos LIKE '%' + @apellidos + '%')
-                                     AND (@movil IS NULL OR s.telefono_movil LIKE '%' + @movil + '%')
-                                     AND (@lineabaja IS NULL OR s.telefono_lineabaja LIKE '%' + @lineabaja + '%')
-                                     AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
-                                     AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
+                             WHERE @codigoProducto IS NULL OR pr.codigo LIKE '%' + @codigoProducto + '%'
+                            AND (@nombreProducto IS NULL OR pr.nombre LIKE '%' + @nombreProducto + '%')
+                            AND (@descripcionProducto IS NULL OR pr.descripcion LIKE '%' + @descripcionProducto + '%')
+                            AND (@nombreCategoria IS NULL OR c.nombre LIKE '%' + @nombreCategoria + '%')";
                     }
                 }
 
                 // Definición de parámetros
                 var parametros = new DynamicParameters();
 
-                parametros.Add("@codigoCliente", request.ParametroCodigoCliente);
-                parametros.Add("@cedula", request.Cedula);
-                parametros.Add("@ruc", request.Ruc);
-                parametros.Add("@nombres", request.Nombres);
-                parametros.Add("@apellidos", request.Apellidos);
-                parametros.Add("@movil", request.TelefonoMovil);
-                parametros.Add("@lineabaja", request.TelefonoLineaBaja);
-                parametros.Add("@direccion", request.DireccionParticular);
-                parametros.Add("@numerocasa", request.NumeroCasa);
+                parametros.Add("@codigoProducto", request.CodigoProducto);
+                parametros.Add("@nombreProducto", request.NombreProducto);
+                parametros.Add("@descripcionProducto", request.DescripcionProducto);
+                parametros.Add("@nombreCategoria", request.NombreCategoria);
+
                 parametros.Add("@terminoDeBusqueda", $"%{request.TerminoBusqueda}%");
                 parametros.Add("@saltarRegistros", saltarRegistros);
                 parametros.Add("@cantidadRegistros", request.CantidadRegistros);
@@ -212,14 +188,33 @@ namespace sgcv_backend.Persistence.Repositories
 
                 using (var connection = this._conexion.CreateSqlConnection())
                 {
-                    var totalTegistros = await connection.ExecuteScalarAsync<int>(queryCantidadTotalRegistros, parametros);
+                    var totalRegistros = await connection.ExecuteScalarAsync<int>(queryCantidadTotalRegistros, parametros);
 
-                    var resultado = await connection.QueryAsync<ClienteDatosPersonalesResponse>(query, parametros);
+                    var lookup = new Dictionary<int, ProductoConPrecioResponse>();
 
-                    var response = new Datos<IEnumerable<ClienteDatosPersonalesResponse>>
+                    await connection.QueryAsync<ProductoConPrecioResponse, Categoria, UnidadMedida, Precio, ProductoConPrecioResponse>(
+                        query,
+                        (producto, categoria, unidadMedida, precio) =>
+                        {
+                            if (!lookup.TryGetValue(producto.IDProducto, out var productoEntry))
+                            {
+                                productoEntry = producto;
+                                productoEntry.Categoria = categoria;
+                                productoEntry.UnidadMedida = unidadMedida;
+                                productoEntry.Precios = new List<Precio>();
+                                lookup.Add(producto.IDProducto, productoEntry);
+                            }
+                            productoEntry.Precios.Add(precio);
+                            return productoEntry;
+                        },
+                        parametros,
+                        splitOn: "CodigoCategoria,CodigoUnidadMedida,ListaPrecio"
+                    );
+
+                    var response = new Datos<IEnumerable<ProductoConPrecioResponse>>
                     {
-                        Items = resultado,
-                        TotalRegistros = totalTegistros
+                        Items = lookup.Values,
+                        TotalRegistros = totalRegistros
                     };
 
                     _logger.LogInformation("Inicio de Proceso de Obtener Datos del Producto");
@@ -229,7 +224,7 @@ namespace sgcv_backend.Persistence.Repositories
 
             catch (Exception ex)
             {
-                throw new ClientesException("Ocurrió un error inesperado al realizar la Consulta de Datos Particulares de Clientes" + "||-->" + ex.Message + "<--||");
+                throw new ClientesException("Ocurrió un error inesperado al realizar la Consulta de Datos del producto" + "||-->" + ex.Message + "<--||");
             }
         }
 
@@ -304,8 +299,7 @@ namespace sgcv_backend.Persistence.Repositories
                 using (var connection = this._conexion.CreateSqlConnection())
                 {                 
                     var parametros = new DynamicParameters();
-
-                    //Generamos los valores para registrar la tabla Clientes
+                   
                     int ultimoValorCodigo = await connection.ExecuteScalarAsync<int>(query_UltimoNroCodigo);
                     int nuevoCodigoSolicitud = ultimoValorCodigo + 1;
                     parametros.Add("@codigoprecio", nuevoCodigoSolicitud);
@@ -335,6 +329,43 @@ namespace sgcv_backend.Persistence.Repositories
             catch (Exception ex)
             {
                 throw new ClientesException("Ocurrio un error al insertar los datos en la tabla Precio Producto" + "||-->" + ex.Message + "<--||");
+            }
+        }
+
+        public async Task<int> ActualizarDatosdelProducto(ProductoDatosActualizarRequest request)
+        {
+            _logger.LogInformation("Inicio del Proceso de actualizar datos del Producto");
+
+            string query = @"UPDATE producto_nombre
+                               SET codigo = @codigo,
+                                   nombre = @nombre,
+                                   descripcion = @descripcion, 
+                                   codigo_categoria = @codigo_categoria,
+                                   codigo_unidadmedida = @codigo_unidadmedida
+                             WHERE codigo_producto = @codigo_producto";
+            
+            var parametros = new DynamicParameters();
+
+            parametros.Add("@codigo", request.Codigo);
+            parametros.Add("@nombre", request.Nombre);
+            parametros.Add("@descripcion", request.Descripcion);
+            parametros.Add("@codigo_categoria", request.CodigoCategoria);
+            parametros.Add("@codigo_unidadmedida", request.CodigoUnidadMedida);
+            parametros.Add("@codigo_producto", request.CodigoProducto);
+
+            try
+            {
+                using (var connection = this._conexion.CreateSqlConnection())
+                {              
+                    var resultado = await connection.ExecuteAsync(query, parametros);
+
+                    _logger.LogInformation("Fin del Proceso de actualizar datos del Producto");
+                    return resultado;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ClientesException("Ocurrió un error al modificar los datos particulares del cliente" + "||-->" + ex.Message + "<--||");
             }
         }
 

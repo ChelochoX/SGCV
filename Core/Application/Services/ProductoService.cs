@@ -19,7 +19,7 @@ public class ProductoService : IProductoService
     }
 
     public async Task<Datos<int>> InsertarDatosProducto(ProductoDatosRequest request)
-    {
+    {       
         return await _repository.InsertarDatosProducto(request);
     }
 
@@ -36,11 +36,15 @@ public class ProductoService : IProductoService
     {
        return await _repository.ObtenerDatosUnidadMedida();
     }
-    public async Task<Datos<IEnumerable<ClienteDatosPersonalesResponse>>> ObtenerDatosdelProducto(ClienteDatosPersonalesObtenerRequest request)
+    public async Task<Datos<IEnumerable<ProductoConPrecioResponse>>> ObtenerDatosdelProducto(ProductoObtenerDatosRequest request)
     {
         return await _repository.ObtenerDatosdelProducto(request);
     }
 
+    public async Task<int> ActualizarDatosdelProducto(ProductoDatosActualizarRequest request)
+    {
+        return await _repository.ActualizarDatosdelProducto(request);
+    }
 
-  
+
 }

@@ -18,8 +18,7 @@ namespace sgcv_backend.Persistence.Repositories
             _conexion = conexion;
             _logger = logger;
         }
-
-        #region CLIENTES
+               
 
         public async Task<Datos<int>> InsertarDatosPersonalesCliente(ClienteDatosPersonalesInsertarRequest request)
         {
@@ -102,9 +101,7 @@ namespace sgcv_backend.Persistence.Repositories
                               ,s.telefono_lineabaja as TelefonoLineaBaja
                               ,s.direccion_particular as DireccionParticular
                               ,s.numero_casa as NumeroCasa
-                          FROM cliente_datospersonales s
-                          WHERE codigo_cliente = @codigoCliente ";
-
+                          FROM cliente_datospersonales s ";                       
 
                 if (
                     !string.IsNullOrEmpty(request.Cedula) ||
@@ -122,28 +119,26 @@ namespace sgcv_backend.Persistence.Repositories
                     if (!string.IsNullOrEmpty(request.TerminoBusqueda))
                     {
                         query += @"
-                                    AND (                                        
-                                        s.cedula LIKE '%' + @terminoDeBusqueda + '%'                       
-                                        OR s.ruc LIKE '%' + @terminoDeBusqueda + '%'                                                            
-                                        OR s.nombres LIKE '%' + @terminoDeBusqueda + '%'                                                               
-                                        OR s.apellidos LIKE '%' + @terminoDeBusqueda + '%'                                                          
-                                        OR s.telefono_movil LIKE '%' + @terminoDeBusqueda + '%'                                                                
-                                        OR s.telefono_lineabaja LIKE '%' + @terminoDeBusqueda + '%' 
-                                        OR s.direccion_particular LIKE '%' + @terminoDeBusqueda + '%'                                                   
-                                        OR (CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @terminoDeBusqueda + '%'
-                                    )";
+                            WHERE s.cedula LIKE '%' + @terminoDeBusqueda + '%'                       
+                            OR s.ruc LIKE '%' + @terminoDeBusqueda + '%'                                                            
+                            OR s.nombres LIKE '%' + @terminoDeBusqueda + '%'                                                               
+                            OR s.apellidos LIKE '%' + @terminoDeBusqueda + '%'                                                          
+                            OR s.telefono_movil LIKE '%' + @terminoDeBusqueda + '%'                                                                
+                            OR s.telefono_lineabaja LIKE '%' + @terminoDeBusqueda + '%' 
+                            OR s.direccion_particular LIKE '%' + @terminoDeBusqueda + '%'                                                   
+                            OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @terminoDeBusqueda + '%'";
                     }
                     else
                     {
                         query += @"
-                                     AND (@cedula IS NULL OR s.cedula LIKE '%' + @cedula + '%')
-                                     AND (@ruc IS NULL OR s.ruc LIKE '%' + @ruc + '%')
-                                     AND (@nombres IS NULL OR s.nombres LIKE '%' + @nombres + '%')
-                                     AND (@apellidos IS NULL OR s.apellidos LIKE '%' + @apellidos + '%')
-                                     AND (@movil IS NULL OR s.telefono_movil LIKE '%' + @movil + '%')
-                                     AND (@lineabaja IS NULL OR s.telefono_lineabaja LIKE '%' + @lineabaja + '%')
-                                     AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
-                                     AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
+                            WHERE @cedula IS NULL OR s.cedula LIKE '%' + @cedula + '%'
+                            AND (@ruc IS NULL OR s.ruc LIKE '%' + @ruc + '%')
+                            AND (@nombres IS NULL OR s.nombres LIKE '%' + @nombres + '%')
+                            AND (@apellidos IS NULL OR s.apellidos LIKE '%' + @apellidos + '%')
+                            AND (@movil IS NULL OR s.telefono_movil LIKE '%' + @movil + '%')
+                            AND (@lineabaja IS NULL OR s.telefono_lineabaja LIKE '%' + @lineabaja + '%')
+                            AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
+                            AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
                     }
                 }
             
@@ -154,8 +149,7 @@ namespace sgcv_backend.Persistence.Repositories
 
                 string queryCantidadTotalRegistros = @"
                                 SELECT COUNT(*) AS TotalRegistros 
-                                FROM cliente_datospersonales s
-                                WHERE codigo_cliente = @codigoCliente ";
+                                FROM cliente_datospersonales s ";                                
 
                 if (
                    !string.IsNullOrEmpty(request.Cedula) ||
@@ -172,35 +166,33 @@ namespace sgcv_backend.Persistence.Repositories
                     if (!string.IsNullOrEmpty(request.TerminoBusqueda))
                     {
                         queryCantidadTotalRegistros += @"
-                                    AND (                                        
-                                         s.cedula LIKE '%' + @terminoDeBusqueda + '%'                       
-                                        OR s.ruc LIKE '%' + @terminoDeBusqueda + '%'                                                            
-                                        OR s.nombres LIKE '%' + @terminoDeBusqueda + '%'                                                               
-                                        OR s.apellidos LIKE '%' + @terminoDeBusqueda + '%'                                                          
-                                        OR s.telefono_movil LIKE '%' + @terminoDeBusqueda + '%'                                                                
-                                        OR s.telefono_lineabaja LIKE '%' + @terminoDeBusqueda + '%' 
-                                        OR s.direccion_particular LIKE '%' + @terminoDeBusqueda + '%'                                                   
-                                        OR (CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @terminoDeBusqueda + '%'
-                                    )";
+                            WHERE s.cedula LIKE '%' + @terminoDeBusqueda + '%'                       
+                            OR s.ruc LIKE '%' + @terminoDeBusqueda + '%'                                                            
+                            OR s.nombres LIKE '%' + @terminoDeBusqueda + '%'                                                               
+                            OR s.apellidos LIKE '%' + @terminoDeBusqueda + '%'                                                          
+                            OR s.telefono_movil LIKE '%' + @terminoDeBusqueda + '%'                                                                
+                            OR s.telefono_lineabaja LIKE '%' + @terminoDeBusqueda + '%' 
+                            OR s.direccion_particular LIKE '%' + @terminoDeBusqueda + '%'                                                   
+                            OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @terminoDeBusqueda + '%'";
                     }
                     else
                     {
                         queryCantidadTotalRegistros += @"
-                                     AND (@cedula IS NULL OR s.cedula LIKE '%' + @cedula + '%')
-                                     AND (@ruc IS NULL OR s.ruc LIKE '%' + @ruc + '%')
-                                     AND (@nombres IS NULL OR s.nombres LIKE '%' + @nombres + '%')
-                                     AND (@apellidos IS NULL OR s.apellidos LIKE '%' + @apellidos + '%')
-                                     AND (@movil IS NULL OR s.telefono_movil LIKE '%' + @movil + '%')
-                                     AND (@lineabaja IS NULL OR s.telefono_lineabaja LIKE '%' + @lineabaja + '%')
-                                     AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
-                                     AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
+                            WHERE @cedula IS NULL OR s.cedula LIKE '%' + @cedula + '%'
+                            AND (@ruc IS NULL OR s.ruc LIKE '%' + @ruc + '%')
+                            AND (@nombres IS NULL OR s.nombres LIKE '%' + @nombres + '%')
+                            AND (@apellidos IS NULL OR s.apellidos LIKE '%' + @apellidos + '%')
+                            AND (@movil IS NULL OR s.telefono_movil LIKE '%' + @movil + '%')
+                            AND (@lineabaja IS NULL OR s.telefono_lineabaja LIKE '%' + @lineabaja + '%')
+                            AND (@direccion IS NULL OR s.direccion_particular LIKE '%' + @direccion + '%')
+                            AND (@numerocasa IS NULL OR CONVERT(VARCHAR, s.numero_casa) LIKE '%' + @numerocasa + '%')";
                     }
                 }           
 
                 // Definición de parámetros
                 var parametros = new DynamicParameters();
                
-                parametros.Add("@codigoCliente", request.ParametroCodigoCliente);
+                //parametros.Add("@codigoCliente", request.ParametroCodigoCliente);
                 parametros.Add("@cedula", request.Cedula);
                 parametros.Add("@ruc", request.Ruc);
                 parametros.Add("@nombres", request.Nombres);
@@ -286,10 +278,6 @@ namespace sgcv_backend.Persistence.Repositories
             {
                 throw new ClientesException("Ocurrió un error al modificar los datos particulares del cliente" + "||-->" + ex.Message + "<--||");
             }
-        }
-
-        #endregion
-
-
+        }      
     }
 }
