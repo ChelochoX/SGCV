@@ -24,7 +24,7 @@ namespace sgcv_backend.Persistence.Repositories
         {
             _logger.LogInformation("Inicio de Proceso de insertar datos en la tabla de Clientes");
 
-            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_cliente),0) FROM [cliente_datospersonales]";
+            string query_UltimoNroCodigo = "SELECT ISNULL(MAX(codigo_cliente),0) FROM cliente_datospersonales";
 
             string query_CheckCedulaExists = "SELECT COUNT(*) FROM cliente_datospersonales WHERE cedula = @cedula";
 
@@ -263,7 +263,7 @@ namespace sgcv_backend.Persistence.Repositories
                 using (var connection = this._conexion.CreateSqlConnection())
                 {
                     int existingCedulaCount = await connection.ExecuteScalarAsync<int>(query_CheckCedulaExists, new { cedula = request.Cedula });
-                    if (existingCedulaCount > 0)
+                    if (existingCedulaCount == 0)
                     {
                         return -1;                       
                     }
