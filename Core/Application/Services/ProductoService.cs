@@ -46,5 +46,9 @@ public class ProductoService : IProductoService
         return await _repository.ActualizarDatosdelProducto(request);
     }
 
+    public async Task<int> ActualizarDatosdelPrecio(PrecioProductoActualizarRequest request)
+    {
+        return await _repository.ActualizarDatosdelPrecioProducto(request); 
+    }
 
 }

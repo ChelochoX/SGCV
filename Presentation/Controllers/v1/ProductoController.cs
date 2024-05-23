@@ -123,7 +123,7 @@ public class ProductoController : ControllerBase
     [SwaggerOperation(
      Summary = "Permite obtener datos del producto",
      Description = "Permitir obtener todos los datos correspondiente al producto")]
-    public async Task<IActionResult> ListarDatosPersonalesdelCliente(
+    public async Task<IActionResult> ListarDatosdelProducto(
         [FromQuery][Description("Valor que indica el periodo de la solicitud")] string? codigoProducto,
         [FromQuery][Description("Valor que indica el centro de responsabilidad")] string? nombreProducto,
         [FromQuery][Description("Valor que indica la descripcion del objeto de gasto")] string? descripcionProducto,
@@ -171,7 +171,7 @@ public class ProductoController : ControllerBase
     [SwaggerOperation(
         Summary = "Permite actualizar datos del producto",
         Description = "Permitir actualizar todos los datos del producto")]
-    public async Task<IActionResult> ActualizarDatosPersonalesdelCliente(
+    public async Task<IActionResult> ActualizarDatosProducto(
     [FromQuery][Description("Valor que indica el codigo del producto")] string codigo,
     [FromQuery][Description("Valor que indica el nombre del producto")] string nombre,
     [FromQuery][Description("Valor que indica la descripcion del producto")] string descripcion,
@@ -215,5 +215,37 @@ public class ProductoController : ControllerBase
     }
 
 
+    [HttpPut("ActualizarPrecioProducto")]
+    [SwaggerOperation(
+        Summary = "Permite actualizar los precios del producto",
+        Description = "Permitir actualizar los datos del precio del producto")]
+    public async Task<IActionResult> ActualizarPrecioProducto(
+     [FromBody][Description("Datos que corresponden al precio del producto a actualizar")]
+       PrecioProductoActualizarRequest request)
+    {
+        var validationResult = new PrecioProductoActualizarRequestValidator().Validate(request);
+
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
+
+        var resultado = await _service.ActualizarDatosdelPrecio(request);
+
+        if (resultado > 0)
+        {
+            return Ok(new ApiResponse<int>
+            {
+                Success = true,
+                Data = resultado,
+                StatusCode = (int)HttpStatusCode.NoContent
+            });
+        }
+        else
+        {
+            throw new KeyNotFoundException();
+        }
+
+    }
 
 }
