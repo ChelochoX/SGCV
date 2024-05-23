@@ -12,6 +12,5 @@ public interface IProductoService
     Task<IEnumerable<UnidadMedidaResponse>> ObtenerDatosUnidadMedida();
     Task<Datos<int>> InsertarPreciosProducto(PrecioProductoRequest request);
     Task<int> ActualizarDatosdelProducto(ProductoDatosActualizarRequest request);
-
-
+    Task<int> ActualizarDatosdelPrecio(PrecioProductoActualizarRequest request);
 }

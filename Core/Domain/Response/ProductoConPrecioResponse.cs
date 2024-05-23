@@ -26,6 +26,7 @@
 
     public class Precio
     {
+        public int CodigoPrecio { get; set; }
         public int ListaPrecio { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
@@ -33,6 +34,7 @@
         public decimal Iva5 { get; set; }
         public decimal Exenta { get; set; }
         public bool EstadoPrecio { get; set; }
+        public string Observacion { get; set; }
     }
 
 

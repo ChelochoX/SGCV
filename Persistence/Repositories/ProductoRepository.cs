@@ -99,12 +99,14 @@ namespace sgcv_backend.Persistence.Repositories
 	                          ,u.siglas as SiglasUnidadMedida
 	                          ,u.nombre as NombreUnidadMedida
                               ,pc.lista as ListaPrecio,
-	                          pc.compra as PrecioCompra,
-	                          pc.venta as PrecioVenta,
-	                          pc.iva10 as Iva10,
-	                          pc.iva5 as Iva5,
-	                          pc.exenta as Exenta,
-	                          pc.estado as EstadoPrecio
+	                         	pc.codigo_precio as CodigoPrecio,
+                                pc.compra as PrecioCompra,
+                                pc.venta as PrecioVenta,
+                                pc.iva10 as Iva10,
+                                pc.iva5 as Iva5,
+                                pc.exenta as Exenta,
+                                pc.estado as EstadoPrecio,
+	                            pc.observacion as Observacion
                           FROM producto_nombre pr 
                           JOIN producto_precio pc ON pr.codigo_producto = pc.codigo_producto
                           JOIN categoria c ON PR.codigo_categoria = c.codigo_categoria
@@ -365,7 +367,54 @@ namespace sgcv_backend.Persistence.Repositories
             }
             catch (Exception ex)
             {
-                throw new ClientesException("Ocurrió un error al modificar los datos particulares del cliente" + "||-->" + ex.Message + "<--||");
+                throw new ClientesException("Ocurrió un error al modificar los datos del producto" + "||-->" + ex.Message + "<--||");
+            }
+        }
+
+        public async Task<int> ActualizarDatosdelPrecioProducto(PrecioProductoActualizarRequest request)
+        {
+            _logger.LogInformation("Inicio del Proceso de actualizar datos del Percio del Producto");
+
+            string query = @"UPDATE producto_precio
+                           SET 
+                               lista = @lista
+                              ,compra = @compra
+                              ,venta = @venta
+                              ,iva10 = @iva10
+                              ,iva5 = @iva5
+                              ,exenta = @exenta
+                              ,estado = @estado
+                              ,observacion = @observacion
+     
+                         WHERE codigo_precio = @codigoprecio
+                         AND  codigo_producto = @codigoproducto";
+
+            var parametros = new DynamicParameters();
+
+            parametros.Add("@lista", request.Lista);
+            parametros.Add("@compra", request.Compra);
+            parametros.Add("@venta", request.Venta);
+            parametros.Add("@iva10", request.Iva10);
+            parametros.Add("@iva5", request.Iva5);
+            parametros.Add("@exenta", request.Exenta);
+            parametros.Add("@estado", request.Estado);
+            parametros.Add("@observacion", request.Observacion);
+            parametros.Add("@codigoproducto", request.CodigoProducto);
+            parametros.Add("@codigoprecio", request.CodigoPrecio);
+
+            try
+            {
+                using (var connection = this._conexion.CreateSqlConnection())
+                {
+                    var resultado = await connection.ExecuteAsync(query, parametros);
+
+                    _logger.LogInformation("Inicio del Proceso de actualizar datos del Percio del Producto");
+                    return resultado;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ClientesException("Ocurrió un error al modificar los datos del precio del producto" + "||-->" + ex.Message + "<--||");
             }
         }
 
