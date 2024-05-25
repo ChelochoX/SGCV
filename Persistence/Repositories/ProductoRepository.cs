@@ -134,7 +134,7 @@ namespace sgcv_backend.Persistence.Repositories
                             WHERE @codigoProducto IS NULL OR pr.codigo LIKE '%' + @codigoProducto + '%'
                             AND (@nombreProducto IS NULL OR pr.nombre LIKE '%' + @nombreProducto + '%')
                             AND (@descripcionProducto IS NULL OR pr.descripcion LIKE '%' + @descripcionProducto + '%')
-                            AND (@nombreCategoria IS NULL OR c.nombre LIKE '%' + @nombreCategoria + '%')";
+                            AND (@nombreCategoria IS NULL OR pr.nombre LIKE '%' + @nombreCategoria + '%')";
                     }
                 }
 
@@ -171,7 +171,7 @@ namespace sgcv_backend.Persistence.Repositories
                              WHERE @codigoProducto IS NULL OR pr.codigo LIKE '%' + @codigoProducto + '%'
                             AND (@nombreProducto IS NULL OR pr.nombre LIKE '%' + @nombreProducto + '%')
                             AND (@descripcionProducto IS NULL OR pr.descripcion LIKE '%' + @descripcionProducto + '%')
-                            AND (@nombreCategoria IS NULL OR c.nombre LIKE '%' + @nombreCategoria + '%')";
+                            AND (@nombreCategoria IS NULL OR pr.nombre LIKE '%' + @nombreCategoria + '%')";
                     }
                 }
 

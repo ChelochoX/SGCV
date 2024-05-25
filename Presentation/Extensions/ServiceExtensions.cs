@@ -18,11 +18,13 @@ public static class ServiceExtensions
         //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         //Bloque de persistencia
-        services.AddTransient<DbConnections>();
-        services.AddTransient<IClienteRepository, ClienteRepository>();
-        services.AddTransient<IClienteService, ClienteService>();
-        services.AddTransient<IProductoRepository, ProductoRepository>();
-        services.AddTransient<IProductoService, ProductoService>();
+        services.AddScoped<DbConnections>();
+        services.AddScoped<IClienteRepository, ClienteRepository>();
+        services.AddScoped<IClienteService, ClienteService>();
+        services.AddScoped<IProductoRepository, ProductoRepository>();
+        services.AddScoped<IProductoService, ProductoService>();
+        services.AddScoped<IProveedorService, ProveedorService>();
+        services.AddScoped<IProveedorRepository, ProveedorRepository>();
 
         services.AddCors(options =>
         {
